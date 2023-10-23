@@ -51,3 +51,8 @@ disable="""
 
 [tool.semantic_release]
 version_toml = [ "pyproject.toml:tool.poetry.version" ]
+version_source = "tag"
+branch = "main"
+upload_to_release = true
+upload_to_repository = true
+build_command = "poetry build"
