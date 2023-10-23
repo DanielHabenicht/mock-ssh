@@ -48,3 +48,6 @@ disable="""
     missing-class-docstring,
     missing-function-docstring,
 """
+
+[tool.semantic_release]
+version_toml = [ "pyproject.toml:tool.poetry.version" ]
