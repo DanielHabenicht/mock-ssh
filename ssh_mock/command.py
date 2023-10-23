@@ -10,7 +10,7 @@ class CommandResult:
     stderr: str = field(default="")
     returncode: int = field(default=0)
     found: bool = field(default=False)
-    modify_host: str | None = field(default=None)
+    modify_host: Union[str, None] = field(default=None)
 
 
 CommandHandlerResult = Optional[Union[CommandResult, str]]
