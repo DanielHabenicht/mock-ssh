@@ -4,8 +4,8 @@ import threading
 from queue import Queue
 from typing import Dict, Optional
 
-import paramiko
 import logging
+import paramiko
 
 from .command import CommandHandler
 
@@ -41,7 +41,7 @@ class ConnectionHandler(paramiko.ServerInterface):
                 func = self._handle_interactive_client
 
             thread = threading.Thread(target=func, args=(channel,))
-            thread.setDaemon(True)
+            thread.daemon = True
             thread.start()
 
     def _handle_client(self, channel: paramiko.Channel) -> None:
@@ -49,7 +49,7 @@ class ConnectionHandler(paramiko.ServerInterface):
             channel.sendall("Hello# ")
 
             command = self.command_queues[channel.chanid].get(block=True)
-            logging.debug(f"Channel {channel.chanid}, executing {command}")
+            logging.debug("Channel %s, executing %s", channel.chanid, command)
             command_result = self._command_handler(command.decode())
 
             channel.sendall(command_result.stdout)
@@ -57,7 +57,7 @@ class ConnectionHandler(paramiko.ServerInterface):
             channel.send_exit_status(command_result.returncode)
 
         except Exception:  # pylint: disable=broad-except
-            logging.exception(f"Error handling client (channel: {channel})")
+            logging.exception("Error handling client (channel: %s)", channel)
         finally:
             try:
                 channel.close()
@@ -78,7 +78,7 @@ class ConnectionHandler(paramiko.ServerInterface):
                     if char == b"\x03":
                         return
                     channel.sendall(char)
-                    if char == b"\r" or char == b"\n":
+                    if char in (b"\r",  b"\n"):
                         if channel.recv_ready():
                             char = channel.recv(1)
                             current_line += char

@@ -5,6 +5,10 @@ import threading
 import logging
 from typing import Any, Optional, Tuple
 
+import re
+import yaml
+from jinja2 import Environment, BaseLoader
+
 from .command import (
     CommandHandler,
     CommandHandlerResult,
@@ -14,9 +18,6 @@ from .command import (
 )
 from .connection_handler import ConnectionHandler
 from .utils import suppress
-import yaml
-import re
-from jinja2 import Environment, BaseLoader
 
 
 def add_file_commands(
@@ -90,11 +91,12 @@ class Server:
     def run_non_blocking(self) -> None:
         self._create_socket()
         self._thread = threading.Thread(target=self._run)
-        self._thread.setDaemon(True)
+        self._thread.daemon = True
         self._thread.start()
 
     def _create_socket(self) -> None:
-        logging.info(f"Starting ssh mock server on {self.host}:{self._port}")
+        logging.info("Starting ssh mock server on %s:%s",
+                     self.host, self._port)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((self.host, self._port))
         self._socket.listen(5)
@@ -118,12 +120,12 @@ class Server:
                 if ex.errno in (errno.EBADF, errno.EINVAL):
                     break
                 raise
-            logging.debug(f"... got connection {conn} from {addr}")
+            logging.debug("... got connection %s from %s", conn, addr)
             handler = ConnectionHandler(
                 conn, self._command_handler, self._default_host
             )
             thread = threading.Thread(target=handler.run)
-            thread.setDaemon(True)
+            thread.daemon = True
             thread.start()
 
     def __exit__(self, *exc_info: Tuple[Any]) -> None:
