@@ -1,20 +1,100 @@
-name: Upload Python Package
+name: Release
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  poetry_version: 1.6.1
 
 jobs:
-  deploy:
+  release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: release
+    env:
+      python-version: '3.10'
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-    - name: Build and publish
-      uses: d1618033/gh-action-python-publish-using-poetry@master
-      with:
-        pypi_username: ${{ secrets.PYPI_USERNAME }}
-        pypi_password: ${{ secrets.PYPI_PASSWORD }}
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: cache poetry install
+        id: cache-poetry
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: python-${{ env.python-version }}-poetry-${{ env.poetry_version }}-0
+
+      - uses: snok/install-poetry@v1
+        if: steps.cache-poetry.outputs.cache-hit != 'true'
+        with:
+          version: ${{ env.poetry_version }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: cache deps
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: python-${{ env.python-version }}-pydeps-${{ hashFiles('**/poetry.lock') }}
+
+      - run: poetry install --no-interaction
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+
+      - name: Semantic Release
+        id: semantic-release
+        run: |
+          echo "::set-output name=version::$(poetry run semantic-release print-version)"
+          echo "{version}={$(poetry run semantic-release print-version)}" >> $GITHUB_OUTPUT
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          poetry run semantic-release publish
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: echo ${{ steps.semantic-release.outputs.version }}
+      # Trigger pypi cache once so the docker build does not fail.
+
+      - name: Wait for package availability in pip
+        run: |
+          while true; do
+          sleep 5
+          pip install ssh-mock==${{ steps.semantic-release.outputs.version }} && break
+          done
+        if: steps.semantic-release.outputs.version != null
+
+      - name: Log in to the Container registry
+        if: steps.semantic-release.outputs.version != null
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        if: steps.semantic-release.outputs.version != null
+        id: meta
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: ghcr.io/danielhabenicht/mock-ssh
+
+      - name: Build and push Docker image
+        if: steps.semantic-release.outputs.version != null
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/danielhabenicht/mock-ssh:${{ steps.semantic-release.outputs.version }} , ghcr.io/danielhabenicht/mock-ssh:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.semantic-release.outputs.version }}
