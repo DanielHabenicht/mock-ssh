@@ -7,13 +7,56 @@ Installation
 ## Python
 
 ```
-pip install fake-ssh
+pip install ssh-mock
 ```
 
 ## Docker
 
-Usage
------
+See docker-compose.yml or run:
+
+```
+
+```
+
+## YML Configuration
+
+```yaml	
+version: "3.7"
+commands:
+# Simple command
+ - command: echo hello
+   stdout: "Hello World!"
+   returncode: 0
+# Command matching regex
+ - command: interface.*
+   stdout: ""
+# Return values from command via JINJA template
+ - command: exec echo.*
+   stdout_template: "{{command[9:]|trim|trim('''')|trim('\"')}}"
+   returncode: 0
+# Modify the Hostname
+ - command: enable
+   stdout: "Password"
+   modify_host: HOST#
+   returncode: 0
+# Use multiple lines
+ - command: show users
+   stdout: "    Line       User       Host(s)              Idle       Location\n*  1 vty 0     rootuser   idle                 00:00:00\n                                                          example.test.de\n\n  Interface    User               Mode         Idle     Peer Address\n\n"
+   returncode: 0
+ - command: show interfaces description
+   stdout: | 
+    Interface                      Status         Protocol Description
+    Vl1                            up             up
+    Vl308                          up             up
+    Gi1/0/1                        up             up       Access Port
+    Gi1/0/12                       down           down     Access Port
+    Gi1/1/1                        down           down
+    Gi1/1/2                        down           down
+    Te1/1/3                        down           down
+    Te1/1/4                        up             up
+```
+
+# Outdated documentation:
 
 ## Blocking Server
 
@@ -23,7 +66,7 @@ Simply write yourself a `server.py` file:
 
 ```python
 from typing import Optional
-from fake_ssh import Server
+from ssh_mock import Server
 
 
 def handler(command: str) -> Optional[str]:
@@ -70,7 +113,7 @@ This server runs in a thread and allows you to run some tests in parallel.
 import paramiko
 import pytest
 
-from fake_ssh import Server
+from mock_ssh import Server
 
 
 def handler(command):

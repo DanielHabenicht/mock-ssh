@@ -2,6 +2,7 @@ import contextlib
 
 import logging
 
+
 @contextlib.contextmanager
 def suppress(exception: Exception):
     try:

@@ -16,9 +16,13 @@ EOL = "\r\n"
 
 class ConnectionHandler(paramiko.ServerInterface):
     def __init__(
-        self, client_conn: socket.SocketIO, command_handler: CommandHandler
+        self,
+        client_conn: socket.SocketIO,
+        command_handler: CommandHandler,
+        default_host: str,
     ):
         self._command_handler: CommandHandler = command_handler
+        self._default_host: str = default_host
         self.thread: Optional[threading.Thread] = None
         self.command_queues: Dict[ChannelID, Queue] = {}
         self.transport: paramiko.Transport = paramiko.Transport(client_conn)
@@ -35,11 +39,8 @@ class ConnectionHandler(paramiko.ServerInterface):
             func = self._handle_client
             if channel.chanid not in self.command_queues:
                 func = self._handle_interactive_client
-            
-            
-            thread = threading.Thread(
-                target=func, args=(channel,)
-            )
+
+            thread = threading.Thread(target=func, args=(channel,))
             thread.setDaemon(True)
             thread.start()
 
@@ -51,7 +52,7 @@ class ConnectionHandler(paramiko.ServerInterface):
             command = self.command_queues[channel.chanid].get(block=True)
             logging.debug(f"Channel {channel.chanid}, executing {command}")
             command_result = self._command_handler(command.decode())
-            
+
             channel.sendall(command_result.stdout)
             channel.sendall_stderr(command_result.stderr)
             channel.send_exit_status(command_result.returncode)
@@ -63,45 +64,62 @@ class ConnectionHandler(paramiko.ServerInterface):
                 channel.close()
             except EOFError:
                 logging.debug("Tried to close already closed channel")
-    
+
     def _handle_interactive_client(self, channel: paramiko.Channel) -> None:
         try:
             # Read input line by line or when escape character is pressed
             while True:
-                channel.sendall("Hello#" + EOL)
-                
+                channel.sendall("\r\n")
+                channel.sendall(self._default_host)
+
                 current_line = b""
                 while True:
                     char = channel.recv(1)
                     current_line += char
-                    if char == b'\x03':
+                    if char == b"\x03":
                         return
                     channel.sendall(char)
-                    if char == b'\r' or char == b'\n':
+                    if char == b"\r" or char == b"\n":
+                        if channel.recv_ready():
+                            char = channel.recv(1)
+                            current_line += char
                         break
-                
-                channel.sendall("\n")
-                command = current_line
-                
-                
+
+                command = current_line.strip(b"\n").strip(b"\r").decode()
+
                 logging.info("Received Command: %s", command)
-                
-                command_result = self._command_handler(command.decode())
-                
-                logging.info("Send Answer: %s", command_result.stdout)
-                if (command_result.found):                
+
+                command_result = self._command_handler(command)
+
+                channel.sendall("\r\n")
+                if command_result.found:
+                    logging.info("Sent Answer     : %s", command_result.stdout)
                     channel.sendall(command_result.stdout)
                     channel.sendall_stderr(command_result.stderr)
                     channel.send_exit_status(command_result.returncode)
+                    if command_result.modify_host is not None:
+                        logging.info(
+                            "Modified Host: '%s' => '%s'",
+                            self._default_host,
+                            command_result.modify_host,
+                        )
+                        self._default_host = command_result.modify_host
                 else:
                     logging.info("Command '%s' not found!", command)
-                    channel.sendall_stderr("#MOCKSERVERFAILURE# Command not found\r\n")
+                    channel.sendall(
+                        "#MOCKSERVERFAILURE# Command not found\r\n"
+                    )
+                    channel.sendall_stderr(
+                        "#MOCKSERVERFAILURE# Command not found\r\n"
+                    )
                     channel.send_exit_status(1)
+                    return
 
         except Exception:  # pylint: disable=broad-except
             logging.exception("Error handling client (channel: %s)", channel)
         finally:
             try:
+                logging.info("Closing channel")
                 channel.close()
             except EOFError:
                 logging.debug("Tried to close already closed channel")
@@ -122,11 +140,18 @@ class ConnectionHandler(paramiko.ServerInterface):
         return True
 
     def check_channel_pty_request(
-        self, channel: paramiko.Channel, term: str, width: int, height: int, pixelwidth: int, pixelheight: int, modes) -> bool:
+        self,
+        channel: paramiko.Channel,
+        term: str,
+        width: int,
+        height: int,
+        pixelwidth: int,
+        pixelheight: int,
+        modes,
+    ) -> bool:
         return True
 
-    def check_channel_shell_request(
-        self, channel: paramiko.Channel) -> bool:
+    def check_channel_shell_request(self, channel: paramiko.Channel) -> bool:
         return True
 
     def check_channel_request(self, kind: str, chanid: ChannelID) -> int:

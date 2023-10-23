@@ -1,6 +1,7 @@
 import functools
 from dataclasses import dataclass, field
 from typing import Callable, Optional, Union
+import logging
 
 
 @dataclass
@@ -9,6 +10,7 @@ class CommandResult:
     stderr: str = field(default="")
     returncode: int = field(default=0)
     found: bool = field(default=False)
+    modify_host: str | None = field(default=None)
 
 
 CommandHandlerResult = Optional[Union[CommandResult, str]]
@@ -31,16 +33,19 @@ def command_handler_wrapper(
         try:
             result = func(command)
         except CommandFailure as ex:
-            return CommandResult(stderr=ex.stderr, returncode=ex.returncode, found=True)
+            return CommandResult(
+                stderr=ex.stderr, returncode=ex.returncode, found=True
+            )
         except Exception as ex:  # pylint: disable=broad-except
+            logging.error("Exception: %s", ex)
             return CommandResult(stderr=str(ex), returncode=1, found=True)
         if isinstance(result, CommandResult):
             result.found = True
             return result
+        if isinstance(result, str):
+            return CommandResult(stdout=result, found=True)
         if result is None:
             return CommandResult()
-        if isinstance(result, str):
-            return CommandResult(stdout=result)
         raise TypeError(
             f"Unknown type for result: {result}, type: {type(result)}"
         )

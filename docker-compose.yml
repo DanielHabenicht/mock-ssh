@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  sshtest:
+    # use local dockerfile
+    # build:
+    #   context: .
+    #   args:
+    #     - VERSION=0.1.0
+    # use image from dockerhub
+    image: ghcr.io/danielhabenicht/ssh-mock:latest
+    environment:
+      PORT: 5050
+      HOST: 0.0.0.0
+    ports:
+      - 5050:5050
+    volumes:
+      - ./commands.yml:/usr/src/app/commands.yml

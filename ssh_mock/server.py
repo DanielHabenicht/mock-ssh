@@ -7,28 +7,81 @@ from typing import Any, Optional, Tuple
 
 from .command import (
     CommandHandler,
+    CommandHandlerResult,
     CommandHandlerWrapped,
+    CommandResult,
     command_handler_wrapper,
 )
 from .connection_handler import ConnectionHandler
 from .utils import suppress
+import yaml
+import re
+from jinja2 import Environment, BaseLoader
 
+
+def add_file_commands(
+    commands_file: str, command_handler: CommandHandler
+) -> CommandHandlerWrapped:
+    with open(commands_file, "r", encoding="utf-8") as stream:
+        try:
+            commands = yaml.safe_load(stream)["commands"]
+        except yaml.YAMLError as exc:
+            logging.error(exc)
+            raise
+
+    def new_command_handler(command: str) -> CommandHandlerResult:
+        res = command_handler(command)
+        if res is not None:
+            return res
+
+        for cmd in commands:
+            regex = re.compile(cmd["command"])
+            if regex.match(command):
+                result = CommandResult()
+                if "stdout_template" in cmd:
+                    template = Environment(loader=BaseLoader).from_string(
+                        cmd["stdout_template"]
+                    )
+                    result.stdout = template.render(command=command)
+                elif "stdout" in cmd:
+                    result.stdout = cmd["stdout"]
+                if "stderr" in cmd:
+                    result.stderr = cmd["stderr"]
+                if "returncode" in cmd:
+                    result.returncode = cmd["returncode"]
+                if "modify_host" in cmd:
+                    result.modify_host = cmd["modify_host"]
+                else:
+                    result.returncode = 0
+                return result
+        return None
+
+    return command_handler_wrapper(new_command_handler)
 
 
 class Server:
     def __init__(
         self,
         command_handler: CommandHandler,
+        commands_file: str = None,
         host: str = "127.0.0.1",
         port: int = 0,
+        default_host: str = "SSHMOCK>",
     ):
         self._socket: Optional[socket.SocketIO] = None
         self._thread: Optional[threading.Thread] = None
         self.host: str = host
         self._port: int = port
-        self._command_handler: CommandHandlerWrapped = command_handler_wrapper(
-            command_handler
-        )
+        if commands_file is not None:
+            self._command_handler = add_file_commands(
+                commands_file=commands_file, command_handler=command_handler
+            )
+        else:
+            self._command_handler: CommandHandlerWrapped = (
+                command_handler_wrapper(command_handler)
+            )
+
+        self._default_host: str = default_host
 
     def __enter__(self) -> "Server":
         self.run_non_blocking()
@@ -41,10 +94,10 @@ class Server:
         self._thread.start()
 
     def _create_socket(self) -> None:
+        logging.info(f"Starting ssh mock server on {self.host}:{self._port}")
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((self.host, self._port))
         self._socket.listen(5)
-        logging.info(f"Starting ssh server on {self.host}:{self.port}")
 
     def run_blocking(self) -> None:
         self._create_socket()
@@ -66,7 +119,9 @@ class Server:
                     break
                 raise
             logging.debug(f"... got connection {conn} from {addr}")
-            handler = ConnectionHandler(conn, self._command_handler)
+            handler = ConnectionHandler(
+                conn, self._command_handler, self._default_host
+            )
             thread = threading.Thread(target=handler.run)
             thread.setDaemon(True)
             thread.start()
