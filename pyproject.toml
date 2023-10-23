@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ssh-mock"
-version = "0.1.1"
+version = "0.0.0"
 description = "Mocks an SSH Server"
 authors = ["DanielHabenicht <daniel-habenicht@outlook.de>"]
 include = ["mock-ssh/server_key"]
