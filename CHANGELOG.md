@@ -2,6 +2,19 @@
 
 
 
+## v0.1.2 (2023-10-23)
+
+### Fix
+
+* fix: build ([`3be11f8`](https://github.com/DanielHabenicht/mock-ssh/commit/3be11f8db4769231d89c9263eb00ef2109a87f9d))
+
+### Unknown
+
+* remove deprecated output ([`2f7efe2`](https://github.com/DanielHabenicht/mock-ssh/commit/2f7efe2b935fa991469f67228d2548879ee08a02))
+
+* fix release finally ([`7786d3f`](https://github.com/DanielHabenicht/mock-ssh/commit/7786d3ff474863c128337a52e4f666dc81087c78))
+
+
 ## v0.1.1 (2023-10-23)
 
 ### Fix
