@@ -2,6 +2,13 @@
 
 
 
+## v0.1.3 (2023-10-23)
+
+### Fix
+
+* fix: example ([`7a6117c`](https://github.com/DanielHabenicht/mock-ssh/commit/7a6117c73f3547f840ddbc4a691306bdd2cb8552))
+
+
 ## v0.1.2 (2023-10-23)
 
 ### Fix
