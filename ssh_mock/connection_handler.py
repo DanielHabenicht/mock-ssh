@@ -46,7 +46,6 @@ class ConnectionHandler(paramiko.ServerInterface):
 
     def _handle_client(self, channel: paramiko.Channel) -> None:
         try:
-            logging.error(f"Hi")
             channel.sendall("Hello# ")
 
             command = self.command_queues[channel.chanid].get(block=True)
