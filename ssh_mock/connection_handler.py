@@ -78,7 +78,7 @@ class ConnectionHandler(paramiko.ServerInterface):
                     if char == b"\x03":
                         return
                     channel.sendall(char)
-                    if char in (b"\r",  b"\n"):
+                    if char in (b"\r", b"\n"):
                         if channel.recv_ready():
                             char = channel.recv(1)
                             current_line += char

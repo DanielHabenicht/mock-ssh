@@ -95,8 +95,9 @@ class Server:
         self._thread.start()
 
     def _create_socket(self) -> None:
-        logging.info("Starting ssh mock server on %s:%s",
-                     self.host, self._port)
+        logging.info(
+            "Starting ssh mock server on %s:%s", self.host, self._port
+        )
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((self.host, self._port))
         self._socket.listen(5)
