@@ -3,7 +3,6 @@ import sys
 
 import paramiko
 import pytest
-from logbook import StreamHandler
 
 from fake_ssh import CommandFailure, Server
 
@@ -17,7 +16,6 @@ def server():
             return command[4:].strip()
         raise CommandFailure(f"Unknown command {command}")
 
-    StreamHandler(sys.stdout).push_application()
     with Server(command_handler=handler) as server:
         yield server
 

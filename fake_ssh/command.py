@@ -8,6 +8,7 @@ class CommandResult:
     stdout: str = field(default="")
     stderr: str = field(default="")
     returncode: int = field(default=0)
+    found: bool = field(default=False)
 
 
 CommandHandlerResult = Optional[Union[CommandResult, str]]
@@ -30,10 +31,11 @@ def command_handler_wrapper(
         try:
             result = func(command)
         except CommandFailure as ex:
-            return CommandResult(stderr=ex.stderr, returncode=ex.returncode)
+            return CommandResult(stderr=ex.stderr, returncode=ex.returncode, found=True)
         except Exception as ex:  # pylint: disable=broad-except
-            return CommandResult(stderr=str(ex), returncode=1)
+            return CommandResult(stderr=str(ex), returncode=1, found=True)
         if isinstance(result, CommandResult):
+            result.found = True
             return result
         if result is None:
             return CommandResult()

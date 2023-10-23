@@ -21,8 +21,7 @@ echo_server = "fake_ssh.demo.echo_server:main"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-Logbook = "^1.5.3"
-paramiko = "^2.4"
+paramiko = "3.3.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

@@ -2,9 +2,8 @@ import errno
 import selectors
 import socket
 import threading
+import logging
 from typing import Any, Optional, Tuple
-
-import logbook
 
 from .command import (
     CommandHandler,
@@ -14,7 +13,6 @@ from .command import (
 from .connection_handler import ConnectionHandler
 from .utils import suppress
 
-_logger = logbook.Logger(__name__)
 
 
 class Server:
@@ -46,7 +44,7 @@ class Server:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((self.host, self._port))
         self._socket.listen(5)
-        _logger.info(f"Starting ssh server on {self.host}:{self.port}")
+        logging.info(f"Starting ssh server on {self.host}:{self.port}")
 
     def run_blocking(self) -> None:
         self._create_socket()
@@ -67,7 +65,7 @@ class Server:
                 if ex.errno in (errno.EBADF, errno.EINVAL):
                     break
                 raise
-            _logger.debug(f"... got connection {conn} from {addr}")
+            logging.debug(f"... got connection {conn} from {addr}")
             handler = ConnectionHandler(conn, self._command_handler)
             thread = threading.Thread(target=handler.run)
             thread.setDaemon(True)
@@ -77,7 +75,7 @@ class Server:
         self.close()
 
     def close(self) -> None:
-        _logger.debug("closing...")
+        logging.debug("closing...")
         if self._socket:
             with suppress(Exception):
                 self._socket.shutdown(socket.SHUT_RDWR)
