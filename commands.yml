@@ -9,7 +9,7 @@ commands:
    stdout_template: "{{command[9:]|trim|trim('''')|trim('\"')}}"
    returncode: 0
  - command: enable
-   stdout: "Password"
+   stdout: "Password:"
    modify_host: HOST#
    returncode: 0
  - command: show users

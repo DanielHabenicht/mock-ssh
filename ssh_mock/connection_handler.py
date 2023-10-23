@@ -98,7 +98,7 @@ class ConnectionHandler(paramiko.ServerInterface):
                     channel.send_exit_status(command_result.returncode)
                     if command_result.modify_host is not None:
                         logging.info(
-                            "Modified Host: '%s' => '%s'",
+                            "Modified commandline Host: '%s' => '%s'",
                             self._default_host,
                             command_result.modify_host,
                         )
