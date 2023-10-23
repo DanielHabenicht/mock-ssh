@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "python": "${workspaceFolder}/.venv/bin/python",
-            "program": "./ssh-mock.py",
+            "program": "./example.py",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true

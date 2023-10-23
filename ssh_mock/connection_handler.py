@@ -11,6 +11,7 @@ from .command import CommandHandler
 
 ChannelID = int
 _SERVER_KEY = os.path.join(os.path.dirname(__file__), "server_key")
+EOL = "\r\n"
 
 
 class ConnectionHandler(paramiko.ServerInterface):
@@ -67,7 +68,7 @@ class ConnectionHandler(paramiko.ServerInterface):
         try:
             # Read input line by line or when escape character is pressed
             while True:
-                channel.sendall("Hello# ")
+                channel.sendall("Hello#" + EOL)
                 
                 current_line = b""
                 while True:

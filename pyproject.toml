@@ -1,13 +1,16 @@
 [tool.poetry]
-name = "fake-ssh"
+name = "ssh-mock"
 version = "0.1.0"
-description = "Fakes an SSH Server"
-authors = ["David Sternlicht <dsternlicht@infinidat.com>"]
-include = ["fake_ssh/server_key"]
+description = "Mocks an SSH Server"
+authors = ["DanielHabenicht <daniel-habenicht@outlook.de>"]
+include = ["mock-ssh/server_key"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/d1618033/fake-ssh.git"
-homepage = "https://github.com/d1618033/fake-ssh.git"
+exclude = [
+    "tests",
+]
+repository = "https://github.com/DanielHabenicht/mock-ssh.git"
+homepage = "https://github.com/DanielHabenicht/mock-ssh.git"
 keywords = [
     "SSH",
     "Server",
@@ -15,9 +18,6 @@ keywords = [
     "Mock",
     "Testing",
 ]
-
-[tool.poetry.scripts]
-echo_server = "fake_ssh.demo.echo_server:main"
 
 [tool.poetry.dependencies]
 python = "^3.7"

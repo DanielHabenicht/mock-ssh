@@ -1,23 +1,16 @@
 Mock SSH Server
 -----------------
 
-
-Do you...
-
-* have a test that SSHs into a server and don't want the hassle of setting one up for testing?
-
-* think monkeypatching isn't as good as it sounds?
-
-* want to develop an application and need a fake server to return predefined results?
-
-This package is for you!
-
 Installation
 -----------
+
+## Python
 
 ```
 pip install fake-ssh
 ```
+
+## Docker
 
 Usage
 -----
@@ -107,3 +100,8 @@ def test_ls(server):
     assert my_ls(server.host, server.port) == ["file1", "file2"]
 
 ```
+
+
+## Thanks
+
+This was initally a fork of [https://github.com/d1618033/fake-ssh](https://github.com/d1618033/fake-ssh). Thanks [David](https://github.com/d1618033) for your work!
