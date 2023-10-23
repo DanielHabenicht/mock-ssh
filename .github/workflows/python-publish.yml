@@ -53,8 +53,8 @@ jobs:
       - name: Semantic Release
         id: semantic-release
         run: |
-          echo "::set-output name=version::$(poetry run semantic-release print-version)"
-          echo "{version}={$(poetry run semantic-release print-version)}" >> $GITHUB_OUTPUT
+          echo "::set-output name=version::$(poetry run semantic-release version --print)"
+          echo "{version}={$(poetry run semantic-release version --print)}" >> $GITHUB_OUTPUT
           git config user.name github-actions
           git config user.email github-actions@github.com
           poetry run semantic-release publish
