@@ -68,6 +68,7 @@ class Server:
         host: str = "127.0.0.1",
         port: int = 0,
         default_host: str = "SSHMOCK>",
+        default_line_ending: str = "\n",
     ):
         self._socket: Optional[socket.SocketIO] = None
         self._thread: Optional[threading.Thread] = None
@@ -83,6 +84,7 @@ class Server:
             )
 
         self._default_host: str = default_host
+        self._default_line_ending: str = default_line_ending
 
     def __enter__(self) -> "Server":
         self.run_non_blocking()
@@ -123,7 +125,7 @@ class Server:
                 raise
             logging.debug("... got connection %s from %s", conn, addr)
             handler = ConnectionHandler(
-                conn, self._command_handler, self._default_host
+                conn, self._command_handler, self._default_host, self._default_line_ending
             )
             thread = threading.Thread(target=handler.run)
             thread.daemon = True

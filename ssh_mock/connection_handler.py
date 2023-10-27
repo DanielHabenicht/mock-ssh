@@ -20,9 +20,11 @@ class ConnectionHandler(paramiko.ServerInterface):
         client_conn: socket.SocketIO,
         command_handler: CommandHandler,
         default_host: str,
+        default_line_ending: str
     ):
         self._command_handler: CommandHandler = command_handler
         self._default_host: str = default_host
+        self._default_line_ending: str = default_line_ending
         self.thread: Optional[threading.Thread] = None
         self.command_queues: Dict[ChannelID, Queue] = {}
         self.transport: paramiko.Transport = paramiko.Transport(client_conn)
@@ -93,7 +95,7 @@ class ConnectionHandler(paramiko.ServerInterface):
                 channel.sendall("\r\n")
                 if command_result.found:
                     logging.info("Sent Answer     : %s", command_result.stdout)
-                    channel.sendall(command_result.stdout)
+                    channel.sendall(command_result.stdout.replace("\n", EOL))
                     channel.sendall_stderr(command_result.stderr)
                     channel.send_exit_status(command_result.returncode)
                     if command_result.modify_host is not None:
