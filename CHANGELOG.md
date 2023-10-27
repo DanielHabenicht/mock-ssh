@@ -2,6 +2,13 @@
 
 
 
+## v0.1.4 (2023-10-27)
+
+### Fix
+
+* fix: add eol parsing for command stdout ([`191e516`](https://github.com/DanielHabenicht/mock-ssh/commit/191e51686366b9d3771aa3dcfe954243ce0a6571))
+
+
 ## v0.1.3 (2023-10-23)
 
 ### Fix
