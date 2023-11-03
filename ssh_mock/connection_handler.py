@@ -76,14 +76,15 @@ class ConnectionHandler(paramiko.ServerInterface):
                 current_line = b""
                 while True:
                     char = channel.recv(1)
-                    current_line += char
                     if char == b"\x03":
                         return
+                    current_line += char
                     channel.sendall(char)
                     if char in (b"\r", b"\n"):
                         if channel.recv_ready():
                             char = channel.recv(1)
                             current_line += char
+                            channel.sendall(char)
                         break
 
                 command = current_line.strip(b"\n").strip(b"\r").decode()
@@ -92,6 +93,7 @@ class ConnectionHandler(paramiko.ServerInterface):
 
                 command_result = self._command_handler(command, self.state)
 
+                
                 # channel.sendall("\r\n")
                 if command_result.found:
                     logging.info("Sent Answer     : %s", command_result.stdout)
