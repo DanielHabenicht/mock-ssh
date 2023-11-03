@@ -2,6 +2,13 @@
 
 
 
+## v0.2.0 (2023-11-03)
+
+### Feature
+
+* feat: add new state logic ([`5f00273`](https://github.com/DanielHabenicht/mock-ssh/commit/5f00273ae2dc68275ea633e56e5449d1d896b365))
+
+
 ## v0.1.4 (2023-10-27)
 
 ### Fix
