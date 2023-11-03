@@ -1,6 +1,6 @@
 import functools
 from dataclasses import dataclass, field
-from typing import Callable, Optional, Union
+from typing import Callable, Dict, Optional, Union
 import logging
 
 
@@ -10,12 +10,11 @@ class CommandResult:
     stderr: str = field(default="")
     returncode: int = field(default=0)
     found: bool = field(default=False)
-    modify_host: Union[str, None] = field(default=None)
 
 
 CommandHandlerResult = Optional[Union[CommandResult, str]]
-CommandHandler = Callable[[str], CommandHandlerResult]
-CommandHandlerWrapped = Callable[[str], CommandResult]
+CommandHandler = Callable[[str, Dict[str, str]], CommandHandlerResult]
+CommandHandlerWrapped = Callable[[str, Dict[str, str]], CommandResult]
 
 
 class CommandFailure(Exception):
@@ -26,12 +25,12 @@ class CommandFailure(Exception):
 
 
 def command_handler_wrapper(
-    func: Callable[[str], Union[str, CommandResult]]
+    func: Callable[[str, Dict[str, str]], Union[str, CommandResult]]
 ) -> CommandHandlerWrapped:
     @functools.wraps(func)
-    def wrapped(command: str) -> CommandResult:
+    def wrapped(command: str, state: Dict[str, str]) -> CommandResult:
         try:
-            result = func(command)
+            result = func(command, state)
         except CommandFailure as ex:
             return CommandResult(
                 stderr=ex.stderr, returncode=ex.returncode, found=True

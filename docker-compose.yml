@@ -8,11 +8,10 @@ services:
     #   args:
     #     - VERSION=0.1.0
     # use image from dockerhub
-    image: ghcr.io/danielhabenicht/mock-ssh:0.1.2
+    image: ghcr.io/danielhabenicht/mock-ssh:0.1.3
     environment:
       PORT: 5050
       HOST: 0.0.0.0
-      DEFAULT_HOST: CUSTOM_NAME#
     ports:
       - 5050:5050
     volumes:

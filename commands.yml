@@ -1,3 +1,15 @@
+initial_state:
+  _host: "HOST#"
+  vars:
+    Vl1: 'True'
+    Vl308: 'True'
+    Gi1/0/1: 'True'
+    Gi1/0/12: 'False'
+    Gi1/1/1: 'False'
+    Gi1/1/2: 'False'
+    Te1/1/3: 'False'
+    Te1/1/4: 'True'
+
 commands:
  - command: term shell
    stdout: ""
@@ -10,25 +22,29 @@ commands:
    returncode: 0
  - command: enable
    stdout: "Password:"
-   modify_host: HOST#
+   modify_host: HOSTTTTTT#
    returncode: 0
  - command: show users
    stdout: "    Line       User       Host(s)              Idle       Location\n*  1 vty 0     rootuser   idle                 00:00:00\n                                                        example.test.de\n\n  Interface    User               Mode         Idle     Peer Address\n\n"
    returncode: 0
  - command: show interfaces description
-   stdout: | 
+   stdout_template: | 
     Interface                      Status         Protocol Description
-    Vl1                            up             up
-    Vl308                          up             up
-    Gi1/0/1                        up             up       Access Port
-    Gi1/0/12                       down           down     Access Port
-    Gi1/1/1                        down           down
-    Gi1/1/2                        down           down
-    Te1/1/3                        down           down
-    Te1/1/4                        up             up
+    Vl1                            {{'up  ' if vars['Vl1'] == 'True' else 'down'}}           up
+    Vl308                          {{'up  ' if vars['Vl308'] == 'True' else 'down'}}           up
+    Gi1/0/1                        {{'up  ' if vars['Gi1/0/1'] == 'True' else 'down'}}           up       Access Port
+    Gi1/0/12                       {{'up  ' if vars['Gi1/0/12'] == 'True' else 'down'}}           down     Access Port
+    Gi1/1/1                        {{'up  ' if vars['Gi1/1/1'] == 'True' else 'down'}}           down
+    Gi1/1/2                        {{'up  ' if vars['Gi1/1/2'] == 'True' else 'down'}}           down
+    Te1/1/3                        {{'up  ' if vars['Te1/1/3'] == 'True' else 'down'}}           down
+    Te1/1/4                        {{'up  ' if vars['Te1/1/4'] == 'True' else 'down'}}           up
  - command: config terminal
    stdout: ""
- - command: interface.*
+ - command: interface\s(.*)
+   stdout: ""
+   update_state:
+     "{{match.group(1)}}": "{{vars[match.group(1)] is false}}"
+ - command: shutdown
    stdout: ""
  - command: no shutdown
    stdout: ""

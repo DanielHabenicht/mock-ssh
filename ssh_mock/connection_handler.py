@@ -18,12 +18,12 @@ class ConnectionHandler(paramiko.ServerInterface):
     def __init__(
         self,
         client_conn: socket.SocketIO,
+        state: Dict[str, str],
         command_handler: CommandHandler,
-        default_host: str,
         default_line_ending: str
     ):
+        self.state: Dict[str, str] = state
         self._command_handler: CommandHandler = command_handler
-        self._default_host: str = default_host
         self._default_line_ending: str = default_line_ending
         self.thread: Optional[threading.Thread] = None
         self.command_queues: Dict[ChannelID, Queue] = {}
@@ -71,7 +71,7 @@ class ConnectionHandler(paramiko.ServerInterface):
             # Read input line by line or when escape character is pressed
             while True:
                 channel.sendall("\r\n")
-                channel.sendall(self._default_host)
+                channel.sendall(self.state["_host"])
 
                 current_line = b""
                 while True:
@@ -90,21 +90,14 @@ class ConnectionHandler(paramiko.ServerInterface):
 
                 logging.info("Received Command: %s", command)
 
-                command_result = self._command_handler(command)
+                command_result = self._command_handler(command, self.state)
 
-                channel.sendall("\r\n")
+                # channel.sendall("\r\n")
                 if command_result.found:
                     logging.info("Sent Answer     : %s", command_result.stdout)
                     channel.sendall(command_result.stdout.replace("\n", EOL))
                     channel.sendall_stderr(command_result.stderr)
                     channel.send_exit_status(command_result.returncode)
-                    if command_result.modify_host is not None:
-                        logging.info(
-                            "Modified commandline Host: '%s' => '%s'",
-                            self._default_host,
-                            command_result.modify_host,
-                        )
-                        self._default_host = command_result.modify_host
                 else:
                     logging.info("Command '%s' not found!", command)
                     channel.sendall(
