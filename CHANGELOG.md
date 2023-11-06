@@ -2,6 +2,13 @@
 
 
 
+## v0.2.1 (2023-11-06)
+
+### Fix
+
+* fix: send last char ([`e7b6065`](https://github.com/DanielHabenicht/mock-ssh/commit/e7b60654a8662438ebc58b7ac70fa53d8cc55586))
+
+
 ## v0.2.0 (2023-11-03)
 
 ### Feature
