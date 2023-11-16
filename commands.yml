@@ -43,7 +43,7 @@ commands:
  - command: interface\s(.*)
    stdout: ""
    update_state:
-     "{{match.group(1)}}": "{{vars[match.group(1)] is false}}"
+     "{{match.group(1)}}": "{{(vars[match.group(1)] == 'True') is false}}"
  - command: shutdown
    stdout: ""
  - command: no shutdown
