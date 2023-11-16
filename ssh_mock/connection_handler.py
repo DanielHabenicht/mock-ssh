@@ -70,11 +70,15 @@ class ConnectionHandler(paramiko.ServerInterface):
         try:
             # Read input line by line or when escape character is pressed
             while True:
+                if channel.closed:
+                        return
                 channel.sendall("\r\n")
                 channel.sendall(self.state["_host"])
 
                 current_line = b""
                 while True:
+                    if channel.closed:
+                        return
                     char = channel.recv(1)
                     if char == b"\x03":
                         return
