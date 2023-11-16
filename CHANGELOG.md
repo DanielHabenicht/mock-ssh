@@ -2,6 +2,17 @@
 
 
 
+## v0.2.2 (2023-11-16)
+
+### Chore
+
+* chore: fix docs commands ([`4a2faf6`](https://github.com/DanielHabenicht/mock-ssh/commit/4a2faf6eaf8a2da8d5b575631c24e50b5d66e2fa))
+
+### Fix
+
+* fix: high cpu problem by endless loop ([`8a09d1f`](https://github.com/DanielHabenicht/mock-ssh/commit/8a09d1f3ed5df561635c22263b370918ddfabb0b))
+
+
 ## v0.2.1 (2023-11-06)
 
 ### Fix
