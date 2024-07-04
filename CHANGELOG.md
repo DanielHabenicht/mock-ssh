@@ -2,6 +2,13 @@
 
 
 
+## v0.3.1 (2024-07-04)
+
+### Fix
+
+* fix: format ([`fa5ef27`](https://github.com/DanielHabenicht/mock-ssh/commit/fa5ef27a4e468923418d9bf778ccc3635747e49f))
+
+
 ## v0.3.0 (2024-07-04)
 
 ### Chore
