@@ -2,6 +2,29 @@
 
 
 
+## v0.3.0 (2024-07-04)
+
+### Chore
+
+* chore: remove old readme ([`d096442`](https://github.com/DanielHabenicht/mock-ssh/commit/d0964422590799ae3ad52fbb74b63e08094cb8b7))
+
+* chore: add venv location ([`0ce2960`](https://github.com/DanielHabenicht/mock-ssh/commit/0ce2960ed58d5af1df7df4b9f20097efd4b63e9e))
+
+* chore: add recommended extension ([`7625a27`](https://github.com/DanielHabenicht/mock-ssh/commit/7625a273f9087328d8dba5011b620d77bdbb42bf))
+
+* chore: format ([`c5642c8`](https://github.com/DanielHabenicht/mock-ssh/commit/c5642c85475667c21bcb6122c373f01960d8d40f))
+
+### Feature
+
+* feat: add cli command ([`ca7fc72`](https://github.com/DanielHabenicht/mock-ssh/commit/ca7fc72da5d840c150d356a57c1f67efc87fddf3))
+
+### Unknown
+
+* fix readme ([`0f00d7c`](https://github.com/DanielHabenicht/mock-ssh/commit/0f00d7cf2d50c4fb3bf1a04d9d6b1a0c4c8fb9bd))
+
+* Create FUNDING.yml ([`7f75f58`](https://github.com/DanielHabenicht/mock-ssh/commit/7f75f5803635584693d4e83a754ae4dce5af341e))
+
+
 ## v0.2.2 (2023-11-16)
 
 ### Chore
