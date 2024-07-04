@@ -32,7 +32,9 @@ def load_config_file(
             logging.error(exc)
             raise
 
-    def new_command_handler(command: str, state: Dict[str, str]) -> CommandHandlerResult:
+    def new_command_handler(
+        command: str, state: Dict[str, str]
+    ) -> CommandHandlerResult:
         res = command_handler(command)
         if res is not None:
             return res
@@ -47,32 +49,43 @@ def load_config_file(
                         cmd["stdout_template"]
                     )
 
-                    result.stdout = template.render({
-                        **state,
-                        'command': command,
-
-                    })
+                    result.stdout = template.render(
+                        {
+                            **state,
+                            "command": command,
+                        }
+                    )
 
                 if "update_state" in cmd:
                     for key in cmd["update_state"].keys():
-                        key_template = Environment(loader=BaseLoader).from_string(key)
-                        value_template = Environment(loader=BaseLoader).from_string(cmd["update_state"][key])
+                        key_template = Environment(
+                            loader=BaseLoader
+                        ).from_string(key)
+                        value_template = Environment(
+                            loader=BaseLoader
+                        ).from_string(cmd["update_state"][key])
 
-                        key_rendered = key_template.render({
-                            **state,
-                            "match": possibleMatch,
-                            command: command,
-                        })
-                        value_rendered = value_template.render({
-                            **state,
-                            "match": possibleMatch,
-                            command: command,
-                        })
+                        key_rendered = key_template.render(
+                            {
+                                **state,
+                                "match": possibleMatch,
+                                command: command,
+                            }
+                        )
+                        value_rendered = value_template.render(
+                            {
+                                **state,
+                                "match": possibleMatch,
+                                command: command,
+                            }
+                        )
 
                         state["vars"][key_rendered] = value_rendered
-                        logging.info("Updated state: %s = %s", key_rendered, value_rendered)
-
-
+                        logging.info(
+                            "Updated state: %s = %s",
+                            key_rendered,
+                            value_rendered,
+                        )
 
                 elif "stdout" in cmd:
                     result.stdout = cmd["stdout"]
@@ -117,7 +130,6 @@ class Server:
             self._command_handler: CommandHandlerWrapped = (
                 command_handler_wrapper(command_handler)
             )
-            
 
         self._default_line_ending: str = default_line_ending
 
@@ -160,7 +172,10 @@ class Server:
                 raise
             logging.debug("... got connection %s from %s", conn, addr)
             handler = ConnectionHandler(
-                conn, self.inital_state, self._command_handler, self._default_line_ending
+                conn,
+                self.inital_state,
+                self._command_handler,
+                self._default_line_ending,
             )
             thread = threading.Thread(target=handler.run)
             thread.daemon = True

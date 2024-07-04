@@ -20,7 +20,7 @@ class ConnectionHandler(paramiko.ServerInterface):
         client_conn: socket.SocketIO,
         state: Dict[str, str],
         command_handler: CommandHandler,
-        default_line_ending: str
+        default_line_ending: str,
     ):
         self.state: Dict[str, str] = state
         self._command_handler: CommandHandler = command_handler
@@ -71,7 +71,7 @@ class ConnectionHandler(paramiko.ServerInterface):
             # Read input line by line or when escape character is pressed
             while True:
                 if channel.closed:
-                        return
+                    return
                 channel.sendall("\r\n")
                 channel.sendall(self.state["_host"])
 
@@ -97,7 +97,6 @@ class ConnectionHandler(paramiko.ServerInterface):
 
                 command_result = self._command_handler(command, self.state)
 
-                
                 # channel.sendall("\r\n")
                 if command_result.found:
                     logging.info("Sent Answer     : %s", command_result.stdout)
