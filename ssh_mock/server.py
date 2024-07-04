@@ -1,13 +1,13 @@
 import errno
+import logging
+import re
 import selectors
 import socket
 import threading
-import logging
 from typing import Any, Dict, Optional, Tuple
 
-import re
 import yaml
-from jinja2 import Environment, BaseLoader
+from jinja2 import BaseLoader, Environment
 
 from .command import (
     CommandHandler,

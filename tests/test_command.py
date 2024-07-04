@@ -1,5 +1,4 @@
 import pytest
-
 from fake_ssh.command import (
     CommandFailure,
     CommandResult,

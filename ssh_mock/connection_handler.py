@@ -1,10 +1,10 @@
+import logging
 import os
 import socket
 import threading
 from queue import Queue
 from typing import Dict, Optional
 
-import logging
 import paramiko
 
 from .command import CommandHandler

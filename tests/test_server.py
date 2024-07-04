@@ -3,7 +3,6 @@ import sys
 
 import paramiko
 import pytest
-
 from fake_ssh import CommandFailure, Server
 
 
