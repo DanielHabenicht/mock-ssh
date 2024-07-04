@@ -1,6 +1,8 @@
 Mock SSH Server
 -----------------
 
+Simple SSH Mock Server for E2E testing purposes, e.g. with [Testcontainers](https://testcontainers.com/).
+
 Installation
 -----------
 
@@ -14,13 +16,16 @@ pip install ssh-mock
 
 See docker-compose.yml or run:
 
+```bash
+docker run --rm -p 5050:5050 -v ./commands.yml:/usr/src/app/commands.yml ghcr.io/danielhabenicht/mock-ssh:0.2.2
+# Try it out
+ssh localhost -p 5050
+exec echo Hello World!
 ```
 
-```
+## YAML Configuration
 
-## YML Configuration
-
-```yaml	
+```yaml	title=commands.yml
 version: "3.7"
 commands:
 # Simple command
