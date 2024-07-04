@@ -1,7 +1,8 @@
 from typing import Optional
-from ssh_mock import Server, CommandResult
 import logging
 import os
+
+from ssh_mock.server import Server
 
 logging.basicConfig(level=logging.INFO)
 
@@ -10,12 +11,10 @@ HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", "5050"))
 DEFAULT_LINEENDING = os.getenv("DEFAULT_LINEENDING", "\n")
 
-
 def handler(command: str) -> Optional[str]:
     pass
 
-
-if __name__ == "__main__":
+def cli():
     Server(
         # Read from ENV
         host=HOST,
@@ -24,3 +23,6 @@ if __name__ == "__main__":
         command_handler=handler,
         commands_file="commands.yml",
     ).run_blocking()
+
+if __name__ == "__main__":
+    cli()

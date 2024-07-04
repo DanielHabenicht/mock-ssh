@@ -10,6 +10,9 @@ Installation
 
 ```
 pip install ssh-mock
+# Create commands.yml
+# Start Mock
+ssh-mock
 ```
 
 ## Docker

@@ -10,5 +10,4 @@ RUN pip install ssh-mock==${VERSION}
 ENV HOST=0.0.0.0
 WORKDIR /usr/src/app
 
-COPY example.py example.py
-ENTRYPOINT ["python", "example.py"]
+ENTRYPOINT ["ssh-mock"]
