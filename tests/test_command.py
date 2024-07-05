@@ -1,5 +1,5 @@
 import pytest
-from fake_ssh.command import (
+from ssh_mock.command import (
     CommandFailure,
     CommandResult,
     command_handler_wrapper,

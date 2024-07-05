@@ -1,9 +1,8 @@
 import os
-import sys
 
 import paramiko
 import pytest
-from fake_ssh import CommandFailure, Server
+from ssh_mock import CommandFailure, Server
 
 
 @pytest.fixture
