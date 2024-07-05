@@ -12,6 +12,7 @@ PORT = int(os.getenv("PORT", "5050"))
 DEFAULT_LINEENDING = os.getenv("DEFAULT_LINEENDING", "\n")
 
 
+# pylint: disable=unused-argument
 def handler(command: str) -> Optional[str]:
     pass
 

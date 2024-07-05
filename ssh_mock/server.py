@@ -22,7 +22,7 @@ from .utils import suppress
 
 def load_config_file(
     commands_file: str, command_handler: CommandHandler
-) -> (CommandHandlerWrapped, Dict[str, str]):
+) -> (CommandHandlerWrapped, Dict[str, str]):  # type: ignore
     with open(commands_file, "r", encoding="utf-8") as stream:
         try:
             config_yaml = yaml.safe_load(stream)
@@ -41,8 +41,8 @@ def load_config_file(
 
         for cmd in commands:
             regex = re.compile(cmd["command"])
-            possibleMatch = regex.match(command)
-            if possibleMatch:
+            possible_match = regex.match(command)
+            if possible_match:
                 result = CommandResult()
                 if "stdout_template" in cmd:
                     template = Environment(loader=BaseLoader).from_string(
@@ -68,14 +68,14 @@ def load_config_file(
                         key_rendered = key_template.render(
                             {
                                 **state,
-                                "match": possibleMatch,
+                                "match": possible_match,
                                 command: command,
                             }
                         )
                         value_rendered = value_template.render(
                             {
                                 **state,
-                                "match": possibleMatch,
+                                "match": possible_match,
                                 command: command,
                             }
                         )
