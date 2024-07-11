@@ -1,8 +1,9 @@
 import os
-
+import time
 import paramiko
 import pytest
 from ssh_mock import CommandFailure, Server
+import threading
 
 
 @pytest.fixture
@@ -14,8 +15,12 @@ def server():
             return command[4:].strip()
         raise CommandFailure(f"Unknown command {command}")
 
-    with Server(command_handler=handler) as server:
-        yield server
+    mock_server = Server(command_handler=handler)
+    with mock_server as server_fixture:
+        thread = threading.Thread(target=server_fixture._run)
+        thread.daemon = True
+        thread.start()
+        yield server_fixture
 
 
 def create_client(server, password="", ssh_key_file=None):
@@ -51,11 +56,12 @@ def create_client(server, password="", ssh_key_file=None):
 @pytest.mark.parametrize(
     "command,result",
     [
-        ("ls", "file1\nfile2"),
-        ("echo 42", "42"),
+        ("ls\n", "file1\nfile2"),
+        ("echo 42\n", "42"),
     ],
 )
 def test_successful_command(server, auth, command, result):
     client = create_client(server, **auth)
     _stdin, stdout, stderr = client.exec_command(command)
-    assert stdout.read().decode() == result, stderr.read()
+    out_string = stdout.read().decode()
+    assert out_string == result, stderr.read()

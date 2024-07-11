@@ -27,7 +27,7 @@ def load_config_file(
         try:
             config_yaml = yaml.safe_load(stream)
             commands = config_yaml["commands"]
-            vars = config_yaml["initial_state"]
+            initial_state = config_yaml["initial_state"]
         except yaml.YAMLError as exc:
             logging.error(exc)
             raise
@@ -105,7 +105,7 @@ def load_config_file(
                 return result
         return None
 
-    return command_handler_wrapper(new_command_handler), vars
+    return command_handler_wrapper(new_command_handler), initial_state
 
 
 class Server:
@@ -131,14 +131,16 @@ class Server:
                 command_handler_wrapper(command_handler)
             )
 
+        if "_host" not in self.inital_state:
+            self.inital_state["_host"] = host
+
         self._default_line_ending: str = default_line_ending
 
     def __enter__(self) -> "Server":
-        self.run_non_blocking()
+        self._create_socket()
         return self
 
     def run_non_blocking(self) -> None:
-        self._create_socket()
         self._thread = threading.Thread(target=self._run)
         self._thread.daemon = True
         self._thread.start()
@@ -152,7 +154,6 @@ class Server:
         self._socket.listen(5)
 
     def run_blocking(self) -> None:
-        self._create_socket()
         self._run()
 
     def _run(self) -> None:
