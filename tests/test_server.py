@@ -1,40 +1,7 @@
 import os
+import subprocess
 
-import paramiko
 import pytest
-from ssh_mock import CommandFailure, Server
-
-
-@pytest.fixture
-def server():
-    def handler(command: str) -> str:
-        if command == "ls":
-            return "file1\nfile2"
-        elif command.startswith("echo"):
-            return command[4:].strip()
-        raise CommandFailure(f"Unknown command {command}")
-
-    with Server(command_handler=handler) as server:
-        yield server
-
-
-def create_client(server, password="", ssh_key_file=None):
-    c = paramiko.SSHClient()
-    c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    kwargs = dict(
-        hostname=server.host,
-        port=server.port,
-        username="root",
-        allow_agent=False,
-        look_for_keys=False,
-    )
-    if ssh_key_file is not None:
-        with open(ssh_key_file) as f:
-            kwargs["pkey"] = paramiko.RSAKey.from_private_key(f)
-    else:
-        kwargs["password"] = password
-    c.connect(**kwargs)
-    return c
 
 
 @pytest.mark.parametrize(
@@ -56,6 +23,14 @@ def create_client(server, password="", ssh_key_file=None):
     ],
 )
 def test_successful_command(server, auth, command, result):
-    client = create_client(server, **auth)
-    _stdin, stdout, stderr = client.exec_command(command)
-    assert stdout.read().decode() == result, stderr.read()
+    (stdout, stderr) = subprocess.Popen(
+        f"echo '{command}' | ssh -o StrictHostKeyChecking=no -p {server.split(':')[1]} {server.split(':')[0]}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).communicate()
+
+    # client = create_client(server, **auth)
+    # _stdin, stdout, stderr = client.exec_command(command, timeout=2)
+    assert stdout.decode() == result, stderr.decode()
+    # client.close()

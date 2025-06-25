@@ -4,7 +4,7 @@ import re
 import selectors
 import socket
 import threading
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, Optional
 
 import yaml
 from jinja2 import BaseLoader, Environment
@@ -118,7 +118,6 @@ class Server:
         default_line_ending: str = "\n",
     ):
         self._socket: Optional[socket.SocketIO] = None
-        self._thread: Optional[threading.Thread] = None
         self.host: str = host
         self._port: int = port
         self.inital_state = {}
@@ -131,17 +130,10 @@ class Server:
                 command_handler_wrapper(command_handler)
             )
 
+        if "_host" not in self.inital_state:
+            self.inital_state["_host"] = host
+
         self._default_line_ending: str = default_line_ending
-
-    def __enter__(self) -> "Server":
-        self.run_non_blocking()
-        return self
-
-    def run_non_blocking(self) -> None:
-        self._create_socket()
-        self._thread = threading.Thread(target=self._run)
-        self._thread.daemon = True
-        self._thread.start()
 
     def _create_socket(self) -> None:
         logging.info(
@@ -181,9 +173,6 @@ class Server:
             thread.daemon = True
             thread.start()
 
-    def __exit__(self, *exc_info: Tuple[Any]) -> None:
-        self.close()
-
     def close(self) -> None:
         logging.debug("closing...")
         if self._socket:
@@ -192,12 +181,3 @@ class Server:
             with suppress(Exception):
                 self._socket.close()
             self._socket = None
-        if self._thread is not None:
-            self._thread.join()
-            self._thread = None
-
-    @property
-    def port(self) -> int:
-        if self._socket is None:
-            raise RuntimeError("Server not running")
-        return self._socket.getsockname()[1]
